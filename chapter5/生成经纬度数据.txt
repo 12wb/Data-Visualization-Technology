@@ -1,0 +1,46 @@
+coding=utf-8
+import requests
+import pandas as pd
+import time
+import json
+class LngLat:
+    # 获取位置一列的数据
+    def get_data(self):
+        house_names = df['位置']
+        house_names = house_names.tolist()
+        return house_names
+    def get_url(self):
+        url_temp = "http://api.map.baidu.com/geocoder/v2/?address={}&output=json&ak=fuE975B0yS3SioQvpPwMtHnGDeV6njr1&callback=showLocation"
+        house_names = self.get_data()
+        return [url_temp.format(i) for i in house_names]
+    # 发送请求
+    def parse_url(self, url):
+        while 1:
+            try:
+                r = requests.get(url)
+            except requests.exceptions.ConnectionError:
+                time.sleep(2)
+                continue
+            return r.content.decode('UTF-8')
+    def run(self):
+        li = []
+        urls = self.get_url()
+        for url in urls:
+            data = self.parse_url(url)
+            str = data.split("{")[-1].split("}")[0]
+            try:
+                lng = float(str.split(",")[0].split(":")[1])
+                lat = float(str.split(",")[1].split(":")[1])
+            except ValueError:
+                continue
+            # 构建字典
+            dict_data = dict(lng=lng, lat=lat, count=1)
+            li.append(dict_data)
+        f = open(r'经纬度信息.txt', 'w')
+        f.write(json.dumps(li))
+        f.close()
+        print('正在写入...')
+        print('写入成功')
+if __name__ == '__main__':
+    execute = LngLat()
+    execute.run()
